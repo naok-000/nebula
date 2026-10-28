@@ -252,9 +252,9 @@ void VelodyneRosWrapper::receive_cloud_packet_callback(const std::vector<uint8_t
     return;
   }
 
-  const auto now = std::chrono::high_resolution_clock::now();
-  const auto timestamp_ns =
-    std::chrono::duration_cast<std::chrono::nanoseconds>(now.time_since_epoch()).count();
+  // Stamp with the node's clock rather than the system clock, so that a replayed stream received under
+  // use_sim_time (a pcap sent alongside a rosbag played with --clock) gets the bag's sim time.
+  const auto timestamp_ns = get_clock()->now().nanoseconds();
 
   auto msg_ptr = std::make_unique<nebula_msgs::msg::NebulaPacket>();
   msg_ptr->stamp.sec = static_cast<int>(timestamp_ns / 1'000'000'000);
